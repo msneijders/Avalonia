@@ -13,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Interactivity;
 using System.Collections.Specialized;
+using Avalonia.Rendering.Composition;
+using Avalonia.Threading;
 
 namespace ListViewApp.Controls
 {
@@ -95,10 +97,45 @@ namespace ListViewApp.Controls
             {
                 Control? element;
                 int index = e.NewStartingIndex;
-                while ((element = _repeater.TryGetElement(index++)) != null)
+
+                Dispatcher.UIThread.Post(() =>
                 {
-                    element.RenderTransformOrigin = new RelativePoint(0.0, 4.0, RelativeUnit.Relative);
-                }
+                    while ((element = _repeater.TryGetElement(index++)) != null)
+                    {
+                        var compositionVisual = (ElementComposition.GetElementVisual(element) as CompositionContainerVisual)!;
+                        var compositor = compositionVisual.Compositor;
+                        // "Offset" is a Vector3 property, so we create a Vector3KeyFrameAnimation
+                        var animation = compositor.CreateVector3KeyFrameAnimation();
+                        // Change the offset of the visual slightly to the left when the animation beginning
+
+                        // Revert the offset to the original position (0,0,0) when the animation ends
+                        animation.InsertKeyFrame(0f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y - compositionVisual.Size.Y });
+                        animation.InsertKeyFrame(0f, compositionVisual.Offset);
+                        animation.Duration = TimeSpan.FromMilliseconds(300);
+                        // Start the new animation!
+                        compositionVisual.StartAnimation("Offset", animation);
+
+                        //    var compositionVisualItemsRepeater = (ElementComposition.GetElementVisual(myItemsRepeater) as CompositionContainerVisual)!;
+                        //    foreach (var compositionVisual in compositionVisualItemsRepeater.Children)
+                        //    {
+                        //        if (compositionVisual.Offset.Y < 0f)
+                        //            continue;
+
+                        //        System.Diagnostics.Debug.WriteLine($"compositionVisual.Offset.Y = {compositionVisual.Offset.Y}");
+
+                        //        var compositor = compositionVisual.Compositor;
+                        //        // "Offset" is a Vector3 property, so we create a Vector3KeyFrameAnimation
+                        //        var animation = compositor.CreateVector3KeyFrameAnimation();
+                        //        // Change the offset of the visual slightly to the left when the animation beginning
+                        //        animation.InsertKeyFrame(0f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y + compositionVisual.Size.Y });
+                        //        // Revert the offset to the original position (0,0,0) when the animation ends
+                        //        animation.InsertKeyFrame(1f, compositionVisual.Offset);
+                        //        animation.Duration = TimeSpan.FromMilliseconds(300);
+                        //        // Start the new animation!
+                        //        compositionVisual.StartAnimation("Offset", animation);
+                        //    }
+                    }
+                }, priority: DispatcherPriority.Background);
             }
             
         }
