@@ -1,0 +1,229 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:ListViewApp.ViewModels"
+             xmlns:my="clr-namespace:ListViewApp.Controls"
+             mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="800"
+             x:DataType="viewModels:MainViewModel"
+             x:Class="ListViewApp.Views.MainView"
+             x:CompileBindings="True">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ControlTheme x:Key="{x:Type my:ListView}" TargetType="my:ListView">
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ListBoxBorderThemeThickness}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Name="border"
+                    ClipToBounds="{TemplateBinding ClipToBounds}"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+              <ScrollViewer Name="PART_ScrollViewer"
+                            HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                            VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                            IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                            AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
+                <ItemsRepeater Name="PART_ItemsPresenter"
+                                Items="{TemplateBinding Items}"
+                                ItemTemplate="{TemplateBinding ItemTemplate}"
+                                Margin="0"
+                                 />
+              </ScrollViewer>
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Grid#bottomSheet">
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Canvas.Bottom" Duration="0:0:0.125"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Grid#bottomSheet">
+      <Setter Property="Canvas.Bottom" Value="-120"/>
+    </Style>
+    <Style Selector="Grid#bottomSheet.open">
+        <Setter Property="Canvas.Bottom" Value="0"/>
+    </Style>
+    <Style Selector="Grid#bottomSheetContent">
+      <Setter Property="Opacity" Value="0"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.125"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Grid#bottomSheet.open Grid#bottomSheetContent">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+
+    <Style Selector="Grid#bottomSheet2">
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Canvas.Bottom" Duration="0:0:0.125"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Grid#bottomSheet2">
+      <Setter Property="Canvas.Bottom" Value="-120"/>
+    </Style>
+    <Style Selector="Grid#bottomSheet2.open">
+      <Setter Property="Canvas.Bottom" Value="0"/>
+    </Style>
+    <Style Selector="Grid#bottomSheetContent2">
+      <Setter Property="Opacity" Value="0"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.125"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Grid#bottomSheet2.open Grid#bottomSheetContent2">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="Border.AantalBox">
+      <Setter Property="Background" Value="DeepPink"/>
+      <Setter Property="CornerRadius" Value="5"/>
+    </Style>
+
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="1"/>
+    </Style>
+  </UserControl.Styles>
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <viewModels:MainViewModel />
+  </Design.DataContext>
+  <Grid>
+  <Grid RowDefinitions="40, *, *, *">
+    <StackPanel Orientation="Horizontal" Spacing="5" Margin="5">
+      <Button x:Name="btnDeselect" Content="Deselect" Click=""/>
+      <Button x:Name="btnTest" Content="Test" Click=""/>
+    </StackPanel>
+    <my:ListView Grid.Row="1" x:Name="list" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
+      <my:ListView.ItemTemplate>
+        <DataTemplate DataType="viewModels:OrderregContainer">
+          <ListBoxItem>
+            <Grid ColumnDefinitions="*, 50">
+              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
+                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
+                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
+                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
+              </Grid>
+              <Border Classes="AantalBox" Grid.Column="1">
+                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+              </Border>
+            </Grid>
+          </ListBoxItem>
+        </DataTemplate>
+      </my:ListView.ItemTemplate>
+    </my:ListView>
+    <my:ListView Grid.Row="2" x:Name="list2" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
+      <my:ListView.ItemTemplate>
+        <DataTemplate DataType="viewModels:OrderregContainer">
+          <ListBoxItem>
+            <Grid ColumnDefinitions="*, 50">
+              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
+                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
+                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
+                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
+              </Grid>
+              <Border Classes="AantalBox" Grid.Column="1">
+                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+              </Border>
+            </Grid>
+          </ListBoxItem>
+        </DataTemplate>
+      </my:ListView.ItemTemplate>
+    </my:ListView>
+    <my:ListView Grid.Row="3" x:Name="list3" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
+      <my:ListView.ItemTemplate>
+        <DataTemplate DataType="viewModels:OrderregContainer">
+          <ListBoxItem>
+            <Grid ColumnDefinitions="*, 50">
+              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
+                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
+                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
+                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
+              </Grid>
+              <Border Classes="AantalBox" Grid.Column="1" >
+                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
+              </Border>
+            </Grid>
+          </ListBoxItem>
+        </DataTemplate>
+      </my:ListView.ItemTemplate>
+    </my:ListView>
+  </Grid>
+  <Canvas>
+    <Grid Classes="closed" x:Name="bottomSheet" Height="180">
+      <Border  Background="LightBlue" Padding="15" BoxShadow="0 0 20 0 #80000000" CornerRadius="10, 10, 0, 0">
+        <Grid ColumnDefinitions="*,*" x:Name="bottomSheetContent">
+          <StackPanel Orientation="Vertical" Grid.Column="0">
+            <TextBlock Text="{Binding Selected.Item.Omschrijving}"/>
+            <TextBlock Text="{Binding Selected.Item.Kweker}"/>
+            <TextBlock Text="{Binding Selected.Sorteringskenmerken}"/>
+            <TextBlock Text="{Binding Selected.Item.Inhoud}"/>
+            <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
+            <TextBox Text="{Binding Selected.Item.Verkoopeenheid}"/>
+            <TextBox Text="{Binding Selected.Item.Prijs}"/>
+          </StackPanel>
+          <StackPanel Orientation="Vertical" Grid.Column="1">
+            <TextBlock Text="{Binding Selected.Item.PartijTotaalAantal}"/>
+            <TextBlock Text="{Binding Selected.Item.Verkoopeenheid}"/>
+            <TextBlock Text="{Binding Selected.Item.Fustcode}"/>
+            <TextBlock Text="{Binding Selected.Item.TotaalBedrag, StringFormat='{}{0:0.00}'}"/>
+            <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
+            <TextBox Text="{Binding Selected.Item.Fustcode}"/>
+            <TextBox Text="{Binding Selected.Item.FustAantal}"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Canvas>
+    <Canvas>
+      <Grid Classes="closed" x:Name="bottomSheet2" Height="180">
+        <Border  Background="LightBlue" Padding="15" BoxShadow="0 0 20 0 #80000000" CornerRadius="10, 10, 0, 0">
+          <Grid ColumnDefinitions="*,*" x:Name="bottomSheetContent2">
+            <StackPanel Orientation="Vertical" Grid.Column="0">
+              <TextBlock Text="{Binding Selected.Item.Omschrijving}"/>
+              <TextBlock Text="{Binding Selected.Item.Kweker}"/>
+              <TextBlock Text="{Binding Selected.Sorteringskenmerken}"/>
+              <TextBlock Text="{Binding Selected.Item.Inhoud}"/>
+              <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
+              <TextBox Text="{Binding Selected.Item.Verkoopeenheid}"/>
+              <TextBox Text="{Binding Selected.Item.Prijs}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Column="1">
+              <TextBlock Text="{Binding Selected.Item.PartijTotaalAantal}"/>
+              <TextBlock Text="{Binding Selected.Item.Verkoopeenheid}"/>
+              <TextBlock Text="{Binding Selected.Item.Fustcode}"/>
+              <TextBlock Text="{Binding Selected.Item.TotaalBedrag, StringFormat='{}{0:0.00}'}"/>
+              <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
+              <TextBox Text="{Binding Selected.Item.Fustcode}"/>
+              <TextBox Text="{Binding Selected.Item.FustAantal}"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+    </Canvas>
+  </Grid>
+</UserControl>
