@@ -45,55 +45,6 @@
     </ResourceDictionary>
   </UserControl.Resources>
   <UserControl.Styles>
-    <Style Selector="Grid#bottomSheet">
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="Canvas.Bottom" Duration="0:0:0.125"/>
-        </Transitions>
-      </Setter>
-    </Style>
-    <Style Selector="Grid#bottomSheet">
-      <Setter Property="Canvas.Bottom" Value="-120"/>
-    </Style>
-    <Style Selector="Grid#bottomSheet.open">
-        <Setter Property="Canvas.Bottom" Value="0"/>
-    </Style>
-    <Style Selector="Grid#bottomSheetContent">
-      <Setter Property="Opacity" Value="0"/>
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="Opacity" Duration="0:0:0.125"/>
-        </Transitions>
-      </Setter>
-    </Style>
-    <Style Selector="Grid#bottomSheet.open Grid#bottomSheetContent">
-      <Setter Property="Opacity" Value="1"/>
-    </Style>
-
-    <Style Selector="Grid#bottomSheet2">
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="Canvas.Bottom" Duration="0:0:0.125"/>
-        </Transitions>
-      </Setter>
-    </Style>
-    <Style Selector="Grid#bottomSheet2">
-      <Setter Property="Canvas.Bottom" Value="-120"/>
-    </Style>
-    <Style Selector="Grid#bottomSheet2.open">
-      <Setter Property="Canvas.Bottom" Value="0"/>
-    </Style>
-    <Style Selector="Grid#bottomSheetContent2">
-      <Setter Property="Opacity" Value="0"/>
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="Opacity" Duration="0:0:0.125"/>
-        </Transitions>
-      </Setter>
-    </Style>
-    <Style Selector="Grid#bottomSheet2.open Grid#bottomSheetContent2">
-      <Setter Property="Opacity" Value="1"/>
-    </Style>
     
     <Style Selector="TextBlock.h1">
       <Setter Property="FontWeight" Value="Bold"/>
@@ -113,7 +64,7 @@
     <viewModels:MainViewModel />
   </Design.DataContext>
   <Grid>
-  <Grid RowDefinitions="40, *, *, *">
+  <Grid RowDefinitions="40, *">
     <StackPanel Orientation="Horizontal" Spacing="5" Margin="5">
       <Button x:Name="btnDeselect" Content="Deselect" Click=""/>
       <Button x:Name="btnTest" Content="Test" Click=""/>
@@ -136,94 +87,7 @@
         </DataTemplate>
       </my:ListView.ItemTemplate>
     </my:ListView>
-    <my:ListView Grid.Row="2" x:Name="list2" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
-      <my:ListView.ItemTemplate>
-        <DataTemplate DataType="viewModels:OrderregContainer">
-          <ListBoxItem>
-            <Grid ColumnDefinitions="*, 50">
-              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
-                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
-                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
-                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
-              </Grid>
-              <Border Classes="AantalBox" Grid.Column="1">
-                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
-              </Border>
-            </Grid>
-          </ListBoxItem>
-        </DataTemplate>
-      </my:ListView.ItemTemplate>
-    </my:ListView>
-    <my:ListView Grid.Row="3" x:Name="list3" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
-      <my:ListView.ItemTemplate>
-        <DataTemplate DataType="viewModels:OrderregContainer">
-          <ListBoxItem>
-            <Grid ColumnDefinitions="*, 50">
-              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
-                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
-                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
-                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
-              </Grid>
-              <Border Classes="AantalBox" Grid.Column="1" >
-                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
-              </Border>
-            </Grid>
-          </ListBoxItem>
-        </DataTemplate>
-      </my:ListView.ItemTemplate>
-    </my:ListView>
+
   </Grid>
-  <Canvas>
-    <Grid Classes="closed" x:Name="bottomSheet" Height="180">
-      <Border  Background="LightBlue" Padding="15" BoxShadow="0 0 20 0 #80000000" CornerRadius="10, 10, 0, 0">
-        <Grid ColumnDefinitions="*,*" x:Name="bottomSheetContent">
-          <StackPanel Orientation="Vertical" Grid.Column="0">
-            <TextBlock Text="{Binding Selected.Item.Omschrijving}"/>
-            <TextBlock Text="{Binding Selected.Item.Kweker}"/>
-            <TextBlock Text="{Binding Selected.Sorteringskenmerken}"/>
-            <TextBlock Text="{Binding Selected.Item.Inhoud}"/>
-            <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
-            <TextBox Text="{Binding Selected.Item.Verkoopeenheid}"/>
-            <TextBox Text="{Binding Selected.Item.Prijs}"/>
-          </StackPanel>
-          <StackPanel Orientation="Vertical" Grid.Column="1">
-            <TextBlock Text="{Binding Selected.Item.PartijTotaalAantal}"/>
-            <TextBlock Text="{Binding Selected.Item.Verkoopeenheid}"/>
-            <TextBlock Text="{Binding Selected.Item.Fustcode}"/>
-            <TextBlock Text="{Binding Selected.Item.TotaalBedrag, StringFormat='{}{0:0.00}'}"/>
-            <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
-            <TextBox Text="{Binding Selected.Item.Fustcode}"/>
-            <TextBox Text="{Binding Selected.Item.FustAantal}"/>
-          </StackPanel>
-        </Grid>
-      </Border>
-    </Grid>
-  </Canvas>
-    <Canvas>
-      <Grid Classes="closed" x:Name="bottomSheet2" Height="180">
-        <Border  Background="LightBlue" Padding="15" BoxShadow="0 0 20 0 #80000000" CornerRadius="10, 10, 0, 0">
-          <Grid ColumnDefinitions="*,*" x:Name="bottomSheetContent2">
-            <StackPanel Orientation="Vertical" Grid.Column="0">
-              <TextBlock Text="{Binding Selected.Item.Omschrijving}"/>
-              <TextBlock Text="{Binding Selected.Item.Kweker}"/>
-              <TextBlock Text="{Binding Selected.Sorteringskenmerken}"/>
-              <TextBlock Text="{Binding Selected.Item.Inhoud}"/>
-              <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
-              <TextBox Text="{Binding Selected.Item.Verkoopeenheid}"/>
-              <TextBox Text="{Binding Selected.Item.Prijs}"/>
-            </StackPanel>
-            <StackPanel Orientation="Vertical" Grid.Column="1">
-              <TextBlock Text="{Binding Selected.Item.PartijTotaalAantal}"/>
-              <TextBlock Text="{Binding Selected.Item.Verkoopeenheid}"/>
-              <TextBlock Text="{Binding Selected.Item.Fustcode}"/>
-              <TextBlock Text="{Binding Selected.Item.TotaalBedrag, StringFormat='{}{0:0.00}'}"/>
-              <TextBlock Text="{Binding Selected.Item.FustAantal}"/>
-              <TextBox Text="{Binding Selected.Item.Fustcode}"/>
-              <TextBox Text="{Binding Selected.Item.FustAantal}"/>
-            </StackPanel>
-          </Grid>
-        </Border>
-      </Grid>
-    </Canvas>
   </Grid>
 </UserControl>
