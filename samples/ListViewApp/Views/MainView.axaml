@@ -66,7 +66,7 @@
   <Grid>
   <Grid RowDefinitions="40, *">
     <StackPanel Orientation="Horizontal" Spacing="5" Margin="5">
-      <Button x:Name="btnDeselect" Content="Deselect" Click=""/>
+      <Button x:Name="btnInsert" Content="Insert at 4" Click=""/>
       <Button x:Name="btnTest" Content="Test" Click=""/>
     </StackPanel>
     <my:ListView Grid.Row="1" x:Name="list" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">

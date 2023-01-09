@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Interactivity;
+using System.Collections.Specialized;
 
 namespace ListViewApp.Controls
 {
@@ -76,7 +77,30 @@ namespace ListViewApp.Controls
         public IEnumerable? Items
         {
             get { return _items; }
-            set { SetAndRaise(ItemsProperty, ref _items, value); }
+            set
+            {
+                if (SetAndRaise(ItemsProperty, ref _items, value))
+                {
+                    if (_items is INotifyCollectionChanged ncc)
+                    {
+                        ncc.CollectionChanged += Ncc_CollectionChanged;
+                    }
+                }
+            }
+        }
+
+        private void Ncc_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if(e.Action == NotifyCollectionChangedAction.Add)
+            {
+                Control? element;
+                int index = e.NewStartingIndex;
+                while ((element = _repeater.TryGetElement(index++)) != null)
+                {
+                    element.RenderTransformOrigin = new RelativePoint(0.0, 4.0, RelativeUnit.Relative);
+                }
+            }
+            
         }
 
         /// <summary>

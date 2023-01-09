@@ -7,6 +7,8 @@ namespace ListViewApp.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+        const int ItemCount = 90;
+
         [ObservableProperty]
         ObservableCollection<OrderregContainer>? regels;
 
@@ -22,31 +24,41 @@ namespace ListViewApp.ViewModels
         {
             
             List<OrderregContainer> containers = new List<OrderregContainer>();
-            for(int i = 1; i < 900; i++)
+            for(int i = 1; i < ItemCount; i++)
             {
                 containers.Add(new OrderregContainer()
                 {
-                    Item = new Orderreg()
-                    {
-                        Omschrijving = $"Omschrijving {i}",
-                        S1 = Random.Shared.Next(1, 99),
-                        S2 = Random.Shared.Next(1, 99),
-                        S3 = Random.Shared.Next(1, 99),
-                        Prijs = Math.Round(Random.Shared.NextDouble() * 100.0, 2),
-                        Aantal = Random.Shared.Next(1, 500),
-                        Inhoud = Random.Shared.Next(20, 100),
-                        Kolli = Random.Shared.Next(1, 30),
-                        Fustcode = Random.Shared.Next(900, 999).ToString(),
-                        FustAantal = Random.Shared.Next(1, 20),
-                        PartijTotaalAantal = Random.Shared.Next(1, 9999),
-                        Kweker = $"Kweker {i}",
-                        Verkoopeenheid = Random.Shared.Next(1, 50),
-                        TotaalBedrag = Math.Round(Random.Shared.NextDouble() * 100.0, 2)
-                    }
+                    Item = GenerateOrderreg(i)
                 });
             }
 
             Regels = new ObservableCollection<OrderregContainer>(containers);
+        }
+
+        private static Orderreg GenerateOrderreg(int i)
+        {
+            return new Orderreg()
+            {
+                Omschrijving = $"Omschrijving {i}",
+                S1 = Random.Shared.Next(1, 99),
+                S2 = Random.Shared.Next(1, 99),
+                S3 = Random.Shared.Next(1, 99),
+                Prijs = Math.Round(Random.Shared.NextDouble() * 100.0, 2),
+                Aantal = Random.Shared.Next(1, 500),
+                Inhoud = Random.Shared.Next(20, 100),
+                Kolli = Random.Shared.Next(1, 30),
+                Fustcode = Random.Shared.Next(900, 999).ToString(),
+                FustAantal = Random.Shared.Next(1, 20),
+                PartijTotaalAantal = Random.Shared.Next(1, 9999),
+                Kweker = $"Kweker {i}",
+                Verkoopeenheid = Random.Shared.Next(1, 50),
+                TotaalBedrag = Math.Round(Random.Shared.NextDouble() * 100.0, 2)
+            };
+        }
+
+        internal void InsertRegel()
+        {
+            Regels!.Insert(4, new OrderregContainer() { Item = GenerateOrderreg(Regels.Count) } );
         }
     }
 

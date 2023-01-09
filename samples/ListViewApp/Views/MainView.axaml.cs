@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using ListViewApp.ViewModels;
 
 namespace ListViewApp.Views
 {
@@ -9,11 +10,13 @@ namespace ListViewApp.Views
         {
             InitializeComponent();
 
-            btnDeselect.Click += BtnDeselect_Click;
+            btnInsert.Click += Insert_Click;
             btnTest.Click += BtnTest_Click;
 
             //list2.SelectionChanged += List_SelectionChanged;
         }
+
+        MainViewModel ViewModel => (DataContext as MainViewModel)!;
 
         protected override void OnLoaded()
         {
@@ -38,9 +41,9 @@ namespace ListViewApp.Views
 
         }
 
-        private void BtnDeselect_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void Insert_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-
+            ViewModel.InsertRegel();
         }
     }
 }
