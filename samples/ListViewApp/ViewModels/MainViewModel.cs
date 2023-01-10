@@ -58,7 +58,7 @@ namespace ListViewApp.ViewModels
 
         internal void InsertRegel()
         {
-            Regels!.Insert(4, new OrderregContainer() { Item = GenerateOrderreg(Regels.Count) } );
+            Regels!.Insert(4, new OrderregContainer() { Item = GenerateOrderreg(Regels.Count + 1) } );
         }
     }
 

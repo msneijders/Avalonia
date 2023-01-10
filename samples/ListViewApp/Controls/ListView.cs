@@ -15,6 +15,7 @@ using Avalonia.Interactivity;
 using System.Collections.Specialized;
 using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
+using System.Xml.Linq;
 
 namespace ListViewApp.Controls
 {
@@ -71,6 +72,8 @@ namespace ListViewApp.Controls
         }
 
         IEnumerable? _items;
+        IEnumerable? _ncc_items;
+        UnnotifyList? _ncclist;
 
         /// <summary>
         /// Gets or sets the items to display.
@@ -81,25 +84,123 @@ namespace ListViewApp.Controls
             get { return _items; }
             set
             {
-                if (SetAndRaise(ItemsProperty, ref _items, value))
+                if (ReferenceEquals(_items, value))
+                    return;
+
+                if (value is INotifyCollectionChanged ncc)
                 {
-                    if (_items is INotifyCollectionChanged ncc)
-                    {
-                        ncc.CollectionChanged += Ncc_CollectionChanged;
-                    }
+                    _ncc_items = value;
+                    value = _ncclist = new UnnotifyList((value as IList)!);
+                    ncc.CollectionChanged += Ncc_CollectionChanged;
                 }
+
+                SetAndRaise(ItemsProperty, ref _items, value);
+            }
+        }
+
+        private class UnnotifyList : IList, INotifyCollectionChanged
+        {
+            IList _items;
+
+            public UnnotifyList(IList items)
+            {
+                _items = new ArrayList(items);
+            }
+
+            public object? this[int index] { get => _items[index]; set => _items[index] = value; }
+
+            public bool IsFixedSize => _items.IsFixedSize;
+
+            public bool IsReadOnly => _items.IsReadOnly;
+
+            public int Count => _items.Count;
+
+            public bool IsSynchronized => _items.IsSynchronized;
+
+            public object SyncRoot => _items.SyncRoot;
+
+            public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+            public int Add(object? value)
+            {
+                return _items.Add(value);
+            }
+
+            public void Clear()
+            {
+                _items.Clear();
+            }
+
+            public bool Contains(object? value)
+            {
+                return _items.Contains(value);
+            }
+
+            public void CopyTo(Array array, int index)
+            {
+                _items.CopyTo(array, index);
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                return _items.GetEnumerator();
+            }
+
+            public int IndexOf(object? value)
+            {
+                return _items.IndexOf(value);
+            }
+
+            public void Insert(int index, object? value)
+            {
+                _items.Insert(index, value);
+            }
+
+            public void Notify(NotifyCollectionChangedEventArgs e)
+            {
+                CollectionChanged?.Invoke(this, e);
+            }
+
+            public void Remove(object? value)
+            {
+                _items.Remove(value);
+            }
+
+            public void RemoveAt(int index)
+            {
+                _items.RemoveAt(index);
+            }
+        }
+
+        const double AnimationDuration = 125;
+
+        void BringIndexIntoView(int index)
+        {
+            var layoutManager = ((TopLevel)VisualRoot!).LayoutManager;
+            var buitenBeeld = _repeater.GetOrCreateElement(index);
+
+            if (buitenBeeld != null)
+            {
+                layoutManager.ExecuteLayoutPass();
+                buitenBeeld.BringIntoView();
             }
         }
 
         private void Ncc_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if(e.Action == NotifyCollectionChangedAction.Add)
+            if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                Control? element;
+                
                 int index = e.NewStartingIndex;
+
+                BringIndexIntoView(Math.Max(0, index - 2));
+                //_scrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled; // scrolling while animating the items is probably not a good idea?
 
                 Dispatcher.UIThread.Post(() =>
                 {
+                    
+
+                    Control? element;
                     while ((element = _repeater.TryGetElement(index++)) != null)
                     {
                         var compositionVisual = (ElementComposition.GetElementVisual(element) as CompositionContainerVisual)!;
@@ -109,35 +210,51 @@ namespace ListViewApp.Controls
                         // Change the offset of the visual slightly to the left when the animation beginning
 
                         // Revert the offset to the original position (0,0,0) when the animation ends
-                        animation.InsertKeyFrame(0f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y - compositionVisual.Size.Y });
-                        animation.InsertKeyFrame(0f, compositionVisual.Offset);
-                        animation.Duration = TimeSpan.FromMilliseconds(300);
+                        animation.InsertKeyFrame(0f, compositionVisual.Offset, new Avalonia.Animation.Easings.CubicEaseOut());
+                        animation.InsertKeyFrame(1f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y + compositionVisual.Size.Y }, new Avalonia.Animation.Easings.CubicEaseOut());
+
+                        animation.StopBehavior = Avalonia.Rendering.Composition.Animations.AnimationStopBehavior.SetToFinalValue;
+                        animation.Duration = TimeSpan.FromMilliseconds(AnimationDuration);
                         // Start the new animation!
                         compositionVisual.StartAnimation("Offset", animation);
-
-                        //    var compositionVisualItemsRepeater = (ElementComposition.GetElementVisual(myItemsRepeater) as CompositionContainerVisual)!;
-                        //    foreach (var compositionVisual in compositionVisualItemsRepeater.Children)
-                        //    {
-                        //        if (compositionVisual.Offset.Y < 0f)
-                        //            continue;
-
-                        //        System.Diagnostics.Debug.WriteLine($"compositionVisual.Offset.Y = {compositionVisual.Offset.Y}");
-
-                        //        var compositor = compositionVisual.Compositor;
-                        //        // "Offset" is a Vector3 property, so we create a Vector3KeyFrameAnimation
-                        //        var animation = compositor.CreateVector3KeyFrameAnimation();
-                        //        // Change the offset of the visual slightly to the left when the animation beginning
-                        //        animation.InsertKeyFrame(0f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y + compositionVisual.Size.Y });
-                        //        // Revert the offset to the original position (0,0,0) when the animation ends
-                        //        animation.InsertKeyFrame(1f, compositionVisual.Offset);
-                        //        animation.Duration = TimeSpan.FromMilliseconds(300);
-                        //        // Start the new animation!
-                        //        compositionVisual.StartAnimation("Offset", animation);
-                        //    }
                     }
+
+                    DispatcherTimer.RunOnce(() =>
+                    {
+                        _ncclist!.Insert(e.NewStartingIndex, e.NewItems![0]!);
+                        (_items as UnnotifyList)!.Notify(e);
+                        _repeater.ElementPrepared += _repeater_ElementPrepared1;
+
+                        //_scrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+                    }, TimeSpan.FromMilliseconds(AnimationDuration));
+
                 }, priority: DispatcherPriority.Background);
             }
             
+        }
+
+        private void _repeater_ElementPrepared1(object? sender, ItemsRepeaterElementPreparedEventArgs e)
+        {
+            var compositionVisual = (ElementComposition.GetElementVisual(e.Element) as CompositionContainerVisual)!;
+            var compositor = compositionVisual.Compositor;
+            // "Offset" is a Vector3 property, so we create a Vector3KeyFrameAnimation
+            var animation = compositor.CreateScalarKeyFrameAnimation();
+            // Change the offset of the visual slightly to the left when the animation beginning
+
+            // Revert the offset to the original position (0,0,0) when the animation ends
+            animation.InsertKeyFrame(0f, 0, new Avalonia.Animation.Easings.CubicEaseOut());
+            animation.InsertKeyFrame(1f, 1, new Avalonia.Animation.Easings.CubicEaseIn());
+
+            animation.StopBehavior = Avalonia.Rendering.Composition.Animations.AnimationStopBehavior.SetToFinalValue;
+            animation.Duration = TimeSpan.FromMilliseconds(AnimationDuration);
+            // Start the new animation!
+            compositionVisual.StartAnimation("Opacity", animation);
+
+            _repeater.ElementPrepared -= _repeater_ElementPrepared1;
+        }
+
+        private void Element_AttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+        {
         }
 
         /// <summary>
@@ -192,6 +309,8 @@ namespace ListViewApp.Controls
         }
 
         ItemsRepeater _repeater = default!;
+        ScrollViewer _scrollViewer = default!;
+
         private PointerPoint _pointPressed;
 
         protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -337,9 +456,12 @@ namespace ListViewApp.Controls
         protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
             base.OnApplyTemplate(e);
+
             _repeater = e.NameScope.Find<ItemsRepeater>("PART_ItemsPresenter")!;
             _repeater.ElementClearing += _repeater_ElementClearing;
             _repeater.ElementPrepared += _repeater_ElementPrepared;
+
+            _scrollViewer = e.NameScope.Find<ScrollViewer>("PART_ScrollViewer")!;
         }
 
         private void _repeater_ElementPrepared(object? sender, ItemsRepeaterElementPreparedEventArgs e)
