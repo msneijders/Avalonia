@@ -16,6 +16,11 @@ namespace ListViewApp.Desktop
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+            //.With(new Win32PlatformOptions()
+            //    {
+            //        UseLowLatencyDxgiSwapChain = true,
+            //        UseWindowsUIComposition = true
+            //    })
                 .LogToTrace();
     }
 }

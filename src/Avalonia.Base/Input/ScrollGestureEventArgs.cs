@@ -6,6 +6,7 @@ namespace Avalonia.Input
     {
         public int Id { get; }
         public Vector Delta { get; }
+        public bool ShouldEndScrollGesture { get; set; }
         private static int _nextId = 1;
 
         public static int GetNextFreeId() => _nextId++;

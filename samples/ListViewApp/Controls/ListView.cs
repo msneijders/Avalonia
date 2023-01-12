@@ -16,6 +16,7 @@ using System.Collections.Specialized;
 using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
 using System.Xml.Linq;
+using System.Numerics;
 
 namespace ListViewApp.Controls
 {
@@ -207,8 +208,9 @@ namespace ListViewApp.Controls
                         var compositor = compositionVisual.Compositor;
                         // "Offset" is a Vector3 property, so we create a Vector3KeyFrameAnimation
                         var animation = compositor.CreateVector3KeyFrameAnimation();
+                        var a = compositor.CreateQuaternionKeyFrameAnimation();
                         // Change the offset of the visual slightly to the left when the animation beginning
-
+                        //new Quaternion()
                         // Revert the offset to the original position (0,0,0) when the animation ends
                         animation.InsertKeyFrame(0f, compositionVisual.Offset, new Avalonia.Animation.Easings.CubicEaseOut());
                         animation.InsertKeyFrame(1f, compositionVisual.Offset with { Y = compositionVisual.Offset.Y + compositionVisual.Size.Y }, new Avalonia.Animation.Easings.CubicEaseOut());
