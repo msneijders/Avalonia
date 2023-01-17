@@ -429,11 +429,6 @@ namespace Avalonia.Controls.Presenters
                 bool offsetChanged = newOffset != Offset;
                 Offset = newOffset;
 
-                if (!offsetChanged)
-                {
-
-                }
-
                 e.Handled = !IsScrollChainingEnabled || offsetChanged;
 
                 e.ShouldEndScrollGesture = !IsScrollChainingEnabled && !offsetChanged;

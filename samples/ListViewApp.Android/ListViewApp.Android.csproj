@@ -1,16 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net7.0-android</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ApplicationId>com.CompanyName.ListViewApp</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
-    <AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+    <MSBuildEnableWorkloadResolver>true</MSBuildEnableWorkloadResolver>
   </PropertyGroup>
+  <ItemGroup>
+    <AndroidEnvironment Condition="'$(IsEmulator)'=='True'" Include="environment.emulator.txt" />
+    <AndroidEnvironment Condition="'$(IsEmulator)'!='True'" Include="environment.device.txt" />
+  </ItemGroup>
 
+  <PropertyGroup Condition="'$(AndroidEnableProfiler)'=='True'">
+    <IsEmulator Condition="'$(IsEmulator)' == ''">True</IsEmulator>
+    <DebugSymbols>True</DebugSymbols>
+  </PropertyGroup>
+  
   <ItemGroup>
     <AndroidResource Include="Icon.png">
       <Link>Resources\drawable\Icon.png</Link>

@@ -707,7 +707,6 @@ namespace Avalonia.Layout
             for (var i = 0; i < visualCount; i++)
             {
                 Visual visual = visualChildren[i];
-
                 if (visual is Layoutable layoutable)
                 {
                     layoutable.Arrange(arrangeRect);
