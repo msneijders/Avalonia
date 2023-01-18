@@ -19,6 +19,7 @@ using System.Xml.Linq;
 using System.Numerics;
 using Avalonia.Media;
 using Avalonia.Layout;
+using System.Diagnostics;
 
 namespace ListViewApp.Controls;
 
@@ -103,93 +104,124 @@ public partial class ListView : TemplatedControl
 
     public ListView()
     {
-        AddHandler(Gestures.ScrollGestureEvent, OnScrollGesture);
-        AddHandler(Gestures.ScrollGestureEndedEvent, OnScrollGestureEnded);
+        AddHandler(Gestures.ScrollGestureEvent, OnScrollGesture, handledEventsToo: true);
+        AddHandler(Gestures.ScrollGestureEndedEvent, OnScrollGestureEnded, handledEventsToo: true);
     }
 
     double stretch_y = 1.0;
     private void OnScrollGesture(object? sender, ScrollGestureEventArgs e)
     {
-        System.Diagnostics.Debug.WriteLine($"OnScrollGesture ({e.Id}): {e.Delta.Y}");
+        //System.Diagnostics.Debug.WriteLine($"ListView.OnScrollGesture ({e.Id}): {e.Delta.Y}");
+
+        if (e.Handled)
+        {
+            ReleaseStretchRepeater();
+            return;
+        }
+
+        if (isReleasing)
+            return;
+
+        if (e.Delta.Y == 0)
+            return;
 
         stretch_y += (Math.Abs(e.Delta.Y) / 8600.0);
 
         e.Handled = true;
         e.ShouldEndScrollGesture = true;
 
-        StretchRepeaterVertically(stretch_y);
-
-        //double z = 1.0;
-
-        //double step = 0.010;
-
-        //double stretch_end = 0.05;
-
-        //double stretch = 0.0;// _stretchController.value;
-        //int direction = 1;
-
-        //DispatcherTimer.Run(
-        //    () =>
-        //    {
-        //        double x = 1.0;
-        //        double y = 1.0;
-
-
-        //        y += stretch;
-
-        //        _repeater.RenderTransformOrigin = new RelativePoint(0, 0, RelativeUnit.Absolute);
-        //        _repeater.RenderTransform = new Avalonia.Media.MatrixTransform(new Matrix(
-        //        x, 0.0, 0.0,
-        //        0.0, y, 0.0,
-        //        0.0, 0.0, z));
-
-        //        stretch += step * direction;
-
-        //        if (stretch <= 0.0)
-        //            return false;
-
-        //        if (direction > 0 && stretch > stretch_end)
-        //        {
-        //            direction = -direction;
-        //        }
-
-        //        return true;
-        //    }, TimeSpan.FromMilliseconds(16));
+        if (e.Delta.Y < 0)
+        {
+            stretchedBottom = false;
+            StretchRepeaterVertically(stretch_y);
+        }
+        else
+        {
+            stretchedBottom = true;
+            StretchRepeaterVerticallyBottom(stretch_y);
+        }
     }
-
+    
     void StretchRepeaterVertically(double value)
     {
-        _repeater.RenderTransformOrigin = new RelativePoint(0, 0, RelativeUnit.Absolute);
-        _repeater.RenderTransform = new Avalonia.Media.MatrixTransform(new Matrix(
+        isStretched = true;
+        _repeater.RenderTransformOrigin = new RelativePoint(0.5, 0.0, RelativeUnit.Relative);
+        _repeater.RenderTransform = new MatrixTransform(new Matrix(
         1.0, 0.0, 0.0,
         0.0, value, 0.0,
         0.0, 0.0, 1.0));
     }
 
+    void StretchRepeaterVerticallyBottom(double value)
+    {
+        isStretched = true;
+
+        _repeater.RenderTransformOrigin = new RelativePoint(0.5, 1.0, RelativeUnit.Relative);
+        _repeater.RenderTransform = new MatrixTransform(new Matrix(
+        1.0, 0.0, 0.0,
+        0.0, value, 0.0,
+        0.0, 0.0, 1.0));
+    }
+
+    bool isStretched = false;
+    bool isReleasing = false;
+    bool stretchedBottom = false;
     void ReleaseStretchRepeater()
     {
-        var steps = (stretch_y - 1.0) / 3;
+        if (!isStretched)
+            return;
+
+        isReleasing = true;
+        Debug.WriteLine($"ReleaseStretchRepeater ({stretch_y})");
+
+        var steps = (stretch_y - 1.0) / 1.5;
+
+        var easing = new Avalonia.Animation.Easings.CubicEaseOut();
+        var st = Stopwatch.StartNew();
 
         DispatcherTimer.Run(
             () =>
             {
-                stretch_y -= steps;
+                //stretch_y -= steps;
+                var progress = Math.Max(0.0, Math.Min(1.0, st.ElapsedMilliseconds / 125.0));
 
-                StretchRepeaterVertically(stretch_y);
+                var e = easing.Ease(progress);
+                var value = (stretch_y - 1.0) * e;
 
-                if (stretch_y <= 1.0)
+                if (stretchedBottom)
                 {
-                    StretchRepeaterVertically(1.0);
+                    StretchRepeaterVerticallyBottom(stretch_y - value);
+                }
+                else
+                {
+                    StretchRepeaterVertically(stretch_y - value);
+                }
+
+                if (progress >= 1.0)// stretch_y <= 1.0)
+                {
+                    stretch_y = 1.0;
+
+                    if (stretchedBottom)
+                    {
+                        StretchRepeaterVerticallyBottom(stretch_y);
+                    }
+                    else
+                    {
+                        StretchRepeaterVertically(stretch_y);
+                    }
+
+                    isStretched = false;
+                    isReleasing = false;
                     return false;
                 }
 
                 return true;
-            }, TimeSpan.FromMilliseconds(16));
+            }, TimeSpan.FromMilliseconds(8), priority: DispatcherPriority.Background);
     }
 
     private void OnScrollGestureEnded(object? sender, ScrollGestureEndedEventArgs e)
     {
-        System.Diagnostics.Debug.WriteLine($"OnScrollGestureEnded ({e.Id})");
+        //System.Diagnostics.Debug.WriteLine($"OnScrollGestureEnded ({e.Id})");
         ReleaseStretchRepeater();
     }
 
@@ -402,7 +434,7 @@ public partial class ListView : TemplatedControl
                     //_scrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
                 }, TimeSpan.FromMilliseconds(AnimationDuration));
 
-            }, priority: DispatcherPriority.Layout);
+            }, priority: DispatcherPriority.Background);
         }
         
     }

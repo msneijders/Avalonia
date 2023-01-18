@@ -32,11 +32,13 @@
                             VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
                             IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
                             AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
-                <ItemsRepeater Name="PART_ItemsPresenter"
-                                Items="{TemplateBinding Items}"
-                                ItemTemplate="{TemplateBinding ItemTemplate}"
-                                Margin="0"
-                                 />
+
+                  <ItemsRepeater Name="PART_ItemsPresenter"
+                                  Items="{TemplateBinding Items}"
+                                  ItemTemplate="{TemplateBinding ItemTemplate}"
+                                  Margin="0"
+                                   />
+
               </ScrollViewer>
             </Border>
           </ControlTemplate>
