@@ -104,15 +104,13 @@ public partial class ListView : TemplatedControl
 
     public ListView()
     {
-        AddHandler(Gestures.ScrollGestureEvent, OnScrollGesture, handledEventsToo: true);
+        AddHandler(Gestures.ScrollGestureEvent, OnScrollGesture, handledEventsToo: true, routes: RoutingStrategies.Bubble);
         AddHandler(Gestures.ScrollGestureEndedEvent, OnScrollGestureEnded, handledEventsToo: true);
     }
 
     double stretch_y = 1.0;
     private void OnScrollGesture(object? sender, ScrollGestureEventArgs e)
     {
-        //System.Diagnostics.Debug.WriteLine($"ListView.OnScrollGesture ({e.Id}): {e.Delta.Y}");
-
         if (e.Handled)
         {
             ReleaseStretchRepeater();
@@ -125,7 +123,18 @@ public partial class ListView : TemplatedControl
         if (e.Delta.Y == 0)
             return;
 
-        stretch_y += (Math.Abs(e.Delta.Y) / 8600.0);
+        if (true)//e.Delta.Y > 5)
+        {
+            System.Diagnostics.Debug.WriteLine($"ListView.OnScrollGesture ({e.Id}): {e.Delta.Y}");
+        }
+
+        var easing = new Avalonia.Animation.Easings.CubicEaseOut();
+        var ease = easing.Ease((stretch_y - 1.0) * 20.0);
+
+        stretch_y += Math.Abs(e.Delta.Y) / (1000.0 + (ease * 18000.0));
+
+        if (stretch_y >= 1.05)
+            stretch_y = 1.05; // max 10% stretching
 
         e.Handled = true;
         e.ShouldEndScrollGesture = true;
@@ -150,6 +159,8 @@ public partial class ListView : TemplatedControl
         1.0, 0.0, 0.0,
         0.0, value, 0.0,
         0.0, 0.0, 1.0));
+
+        //Debug.WriteLine($"stretch.y = {value}");
     }
 
     void StretchRepeaterVerticallyBottom(double value)
@@ -171,10 +182,11 @@ public partial class ListView : TemplatedControl
         if (!isStretched)
             return;
 
-        isReleasing = true;
-        Debug.WriteLine($"ReleaseStretchRepeater ({stretch_y})");
+        if (isReleasing)
+            return;
 
-        var steps = (stretch_y - 1.0) / 1.5;
+        isReleasing = true;
+        Debug.WriteLine($"Releasing ({stretch_y})");
 
         var easing = new Avalonia.Animation.Easings.CubicEaseOut();
         var st = Stopwatch.StartNew();
@@ -183,7 +195,7 @@ public partial class ListView : TemplatedControl
             () =>
             {
                 //stretch_y -= steps;
-                var progress = Math.Max(0.0, Math.Min(1.0, st.ElapsedMilliseconds / 125.0));
+                var progress = Math.Max(0.0, Math.Min(1.0, st.ElapsedMilliseconds / 500.0));
 
                 var e = easing.Ease(progress);
                 var value = (stretch_y - 1.0) * e;
@@ -212,6 +224,7 @@ public partial class ListView : TemplatedControl
 
                     isStretched = false;
                     isReleasing = false;
+                    Debug.WriteLine($"Released");
                     return false;
                 }
 
