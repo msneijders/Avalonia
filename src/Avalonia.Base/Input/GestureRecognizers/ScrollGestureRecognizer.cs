@@ -221,7 +221,7 @@ namespace Avalonia.Input.GestureRecognizers
                         }
 
                         return true;
-                    }, TimeSpan.FromMilliseconds(8), DispatcherPriority.Background);
+                    }, TimeSpan.FromMilliseconds(4), DispatcherPriority.Render);
                 }
             }
         }

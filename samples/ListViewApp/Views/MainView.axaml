@@ -27,19 +27,21 @@
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     CornerRadius="{TemplateBinding CornerRadius}">
-              <ScrollViewer Name="PART_ScrollViewer"
-                            HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
-                            VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
-                            IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
-                            AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
+              <my:StretchEdgeEffect>
+                <ScrollViewer Name="PART_ScrollViewer"
+                              HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                              VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                              IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                              AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
 
                   <ItemsRepeater Name="PART_ItemsPresenter"
                                   Items="{TemplateBinding Items}"
                                   ItemTemplate="{TemplateBinding ItemTemplate}"
                                   Margin="0"
-                                   />
+                                     />
 
-              </ScrollViewer>
+                </ScrollViewer>
+              </my:StretchEdgeEffect>
             </Border>
           </ControlTemplate>
         </Setter>
