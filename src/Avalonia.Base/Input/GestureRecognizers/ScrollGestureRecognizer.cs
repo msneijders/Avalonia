@@ -181,7 +181,11 @@ namespace Avalonia.Input.GestureRecognizers
                     var savedGestureId = _gestureId;
                     var st = Stopwatch.StartNew();
                     var lastTime = TimeSpan.Zero;
-                    DispatcherTimer.Run(() =>
+
+                    var renderTimer = AvaloniaLocator.Current.GetService<Rendering.IRenderTimer>()!;
+                    Action<TimeSpan> ontick = default!;
+
+                    bool Update()
                     {
                         // Another gesture has started, finish the current one
                         if (_gestureId != savedGestureId)
@@ -195,13 +199,6 @@ namespace Avalonia.Input.GestureRecognizers
                         var speed = _inertia * Math.Pow(0.15, st.Elapsed.TotalSeconds);
                         var distance = speed * elapsedSinceLastTick.TotalSeconds;
                         var scrollGestureEventArgs = new ScrollGestureEventArgs(_gestureId, distance);
-                        _target!.RaiseEvent(scrollGestureEventArgs);
-
-                        if (!scrollGestureEventArgs.Handled || scrollGestureEventArgs.ShouldEndScrollGesture)
-                        {
-                            EndGesture();
-                            return false;
-                        }
 
                         // EndGesture using InertialScrollSpeedEnd only in the direction of scrolling
                         if (CanVerticallyScroll && CanHorizontallyScroll && Math.Abs(speed.X) < InertialScrollSpeedEnd && Math.Abs(speed.Y) <= InertialScrollSpeedEnd)
@@ -220,8 +217,80 @@ namespace Avalonia.Input.GestureRecognizers
                             return false;
                         }
 
+                        _target!.RaiseEvent(scrollGestureEventArgs);
+                        if (!scrollGestureEventArgs.Handled || scrollGestureEventArgs.ShouldEndScrollGesture)
+                        {
+                            EndGesture();
+                            return false;
+                        }
+
                         return true;
-                    }, TimeSpan.FromMilliseconds(4), DispatcherPriority.Render);
+                    }
+
+                    bool postHandled = true;
+                    ontick = ts =>
+                    {
+                        if (postHandled)
+                        {
+                            postHandled = false;
+                            Dispatcher.UIThread.Post(
+                                () =>
+                                {
+                                    if (!Update())
+                                    {
+                                        renderTimer.Tick -= ontick;
+                                    }
+                                    else
+                                    {
+                                        postHandled = true;
+                                    }
+                                });
+                        }
+                    };
+
+                    renderTimer.Tick += ontick;
+
+                    //DispatcherTimer.Run(() =>
+                    //{
+                    //    // Another gesture has started, finish the current one
+                    //    if (_gestureId != savedGestureId)
+                    //    {
+                    //        return false;
+                    //    }
+
+                    //    var elapsedSinceLastTick = st.Elapsed - lastTime;
+                    //    lastTime = st.Elapsed;
+
+                    //    var speed = _inertia * Math.Pow(0.15, st.Elapsed.TotalSeconds);
+                    //    var distance = speed * elapsedSinceLastTick.TotalSeconds;
+                    //    var scrollGestureEventArgs = new ScrollGestureEventArgs(_gestureId, distance);
+                    //    _target!.RaiseEvent(scrollGestureEventArgs);
+
+                    //    if (!scrollGestureEventArgs.Handled || scrollGestureEventArgs.ShouldEndScrollGesture)
+                    //    {
+                    //        EndGesture();
+                    //        return false;
+                    //    }
+
+                    //    // EndGesture using InertialScrollSpeedEnd only in the direction of scrolling
+                    //    if (CanVerticallyScroll && CanHorizontallyScroll && Math.Abs(speed.X) < InertialScrollSpeedEnd && Math.Abs(speed.Y) <= InertialScrollSpeedEnd)
+                    //    {
+                    //        EndGesture();
+                    //        return false;
+                    //    }
+                    //    else if (CanVerticallyScroll && Math.Abs(speed.Y) <= InertialScrollSpeedEnd)
+                    //    {
+                    //        EndGesture();
+                    //        return false;
+                    //    }
+                    //    else if (CanHorizontallyScroll && Math.Abs(speed.X) < InertialScrollSpeedEnd)
+                    //    {
+                    //        EndGesture();
+                    //        return false;
+                    //    }
+
+                    //    return true;
+                    //}, TimeSpan.FromMilliseconds(16), DispatcherPriority.Background);
                 }
             }
         }
