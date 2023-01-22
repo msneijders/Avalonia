@@ -12,10 +12,6 @@ using Avalonia.Threading;
 
 namespace ListViewApp.Controls;
 
-// 
-// https://github.com/npolyak/NP.Avalonia.Demos/blob/main/CustomBehaviors/NP.Demos.DragBehaviorSample/MainWindow.axaml
-//
-
 public class StretchEdgeEffect : Decorator
 {
     StretchEdgeEffectController? _controller;
@@ -99,25 +95,6 @@ public class StretchEdgeEffect : Decorator
             _isReleasing = false;
         }
 
-        public void Update(TimeSpan time)
-        {
-            var progress = Math.Max(0.0, Math.Min(1.0, _st.ElapsedMilliseconds / 350.0));
-            var e = _easing.Ease(progress);
-            var value = (_stretch_y - 1.0) * e;
-
-            if (progress >= 1.0)
-            {
-                _needsUpdate = false;
-                _renderTimer.Tick -= Update; // zo loopt android niet vast
-                Dispatcher.UIThread.Post(ResetStretch, DispatcherPriority.Render);
-            }
-            else
-            {
-                //StretchVertically(_stretch_y - value);
-                Dispatcher.UIThread.Post(() => StretchVertically(_stretch_y - value), DispatcherPriority.Render);
-            }
-        }
-
         private void StretchVertically(double value)
         {
             _isStretched = true;
@@ -129,30 +106,7 @@ public class StretchEdgeEffect : Decorator
             {
                 v.Offset = new Vector3(0f, _stretchedBottom ? -(float)(v.Size.Y * (value - 1.0)) : 0f, 0f);
             }
-
-            //v.TransformMatrix = new System.Numerics.Matrix4x4(
-            //    1f, 0f, 0f, 0f,
-            //    0f, (float)value, 0f, 0f,
-            //    0f, 0f, 1f, 0f,
-            //    0f, _stretchedBottom ? -(float)(v.Size.Y * (value - 1.0)) : 0f, 0f, 1f
-            //    );
-
-            //_child.RenderTransformOrigin = new RelativePoint(0.5, _stretchedBottom ? 1.0 : 0.0, RelativeUnit.Relative);
-            //_child.RenderTransform = new MatrixTransform(new Matrix(
-            //1.0, 0.0, 0.0,
-            //0.0, value, 0.0,
-            //0.0, 0.0, 1.0));
         }
-
-        //class AnimationTest : CompositionObject
-        //{
-        //    Stopwatch _sw = Stopwatch.StartNew();
-
-        //    public AnimationTest()
-        //    {
-        //    }
-        //}
-
 
         private void ReleaseStretch()
         {
@@ -186,29 +140,9 @@ public class StretchEdgeEffect : Decorator
                 releaseAnimationGroup.Add(offsetAnimation);
             }
             v.StartAnimationGroup(releaseAnimationGroup);
-            //v.StartAnimation(nameof(v.Scale), re);
 
+            // question: another way to know when releaseAnimationGroup is completed?
             DispatcherTimer.RunOnce(ResetStretch, duration);
-
-            ////a.SetReferenceParameter("stretch_y", v);
-
-            //a.SetMatrix4x4Parameter("scaling", Matrix4x4.Identity);
-            //a.Expression = "scaling";
-
-            ////a.InsertKeyFrame(0f, v.Scale, new Avalonia.Animation.Easings.CubicEaseOut());
-            ////a.InsertKeyFrame(1f, Vector3.One, new Avalonia.Animation.Easings.CubicEaseOut());
-            //v.StartAnimation("TransformMatrix", a);
-            //a.Dispose();0
-
-            //v.TransformMatrix = new System.Numerics.Matrix4x4(
-            //    1f, 0f, 0f, 0f,
-            //    0f, (float)value, 0f, 0f,
-            //    0f, 0f, 1f, 0f,
-            //    0f, _stretchedBottom ? -(float)(v.Size.Y * (value - 1.0)) : 0f, 0f, 1f
-            //    );
-
-            //_st.Restart();
-            //_renderTimer.Tick += Update; // dit loopt vast op android
         }
     }
 }
