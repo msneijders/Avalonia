@@ -117,8 +117,6 @@ public class StretchEdgeEffect : Decorator
 
             _isReleasing = true;
 
-            
-
             var v = (ElementComposition.GetElementVisual(_child) as CompositionContainerVisual)!;
             var releaseAnimationGroup = v.Compositor.CreateAnimationGroup();
             var scalingAnimation = v.Compositor.CreateVector3KeyFrameAnimation();
@@ -140,7 +138,7 @@ public class StretchEdgeEffect : Decorator
 
             v.StartAnimationGroup(releaseAnimationGroup);
 
-            // question: another way to know when releaseAnimationGroup is completed?
+            // question: is there a way to know when releaseAnimationGroup is completed?
             DispatcherTimer.RunOnce(ResetStretch, releaseAnimationDuration);
         }
     }
