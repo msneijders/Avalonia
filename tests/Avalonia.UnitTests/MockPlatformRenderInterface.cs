@@ -149,7 +149,8 @@ namespace Avalonia.UnitTests
             throw new NotImplementedException();
         }
 
-        public IGlyphRunImpl CreateGlyphRun(IGlyphTypeface glyphTypeface, double fontRenderingEmSize, IReadOnlyList<GlyphInfo> glyphInfos)
+        public IGlyphRunImpl CreateGlyphRun(IGlyphTypeface glyphTypeface, double fontRenderingEmSize, 
+            IReadOnlyList<GlyphInfo> glyphInfos, Point baselineOrigin)
         {
             return new MockGlyphRun(glyphInfos);
         }
@@ -181,6 +182,8 @@ namespace Avalonia.UnitTests
         public AlphaFormat DefaultAlphaFormat => AlphaFormat.Premul;
 
         public PixelFormat DefaultPixelFormat => PixelFormat.Rgba8888;
+        public bool IsSupportedBitmapPixelFormat(PixelFormat format) => true;
+
         public void Dispose()
         {
         }

@@ -158,7 +158,8 @@ namespace Avalonia.Direct2D1
         public IGeometryImpl CreateGeometryGroup(FillRule fillRule, IReadOnlyList<Geometry> children) => new GeometryGroupImpl(fillRule, children);
         public IGeometryImpl CreateCombinedGeometry(GeometryCombineMode combineMode, Geometry g1, Geometry g2) => new CombinedGeometryImpl(combineMode, g1, g2);
 
-        public IGlyphRunImpl CreateGlyphRun(IGlyphTypeface glyphTypeface, double fontRenderingEmSize, IReadOnlyList<GlyphInfo> glyphInfos)
+        public IGlyphRunImpl CreateGlyphRun(IGlyphTypeface glyphTypeface, double fontRenderingEmSize, 
+            IReadOnlyList<GlyphInfo> glyphInfos, Point baselineOrigin)
         {
             var glyphTypefaceImpl = (GlyphTypefaceImpl)glyphTypeface;
 
@@ -207,7 +208,6 @@ namespace Avalonia.Direct2D1
 
             var scale = fontRenderingEmSize / glyphTypeface.Metrics.DesignEmHeight;
             var height = glyphTypeface.Metrics.LineSpacing * scale;
-            var baselineOrigin = new Point(0, -glyphTypeface.Metrics.Ascent * scale);
 
             return new GlyphRunImpl(run, new Size(width, height), baselineOrigin);
         }
@@ -339,5 +339,8 @@ namespace Avalonia.Direct2D1
         public AlphaFormat DefaultAlphaFormat => AlphaFormat.Premul;
 
         public PixelFormat DefaultPixelFormat => PixelFormat.Bgra8888;
+        public bool IsSupportedBitmapPixelFormat(PixelFormat format) =>
+            format == PixelFormats.Bgra8888 
+            || format == PixelFormats.Rgba8888;
     }
 }

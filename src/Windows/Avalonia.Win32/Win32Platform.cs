@@ -6,12 +6,10 @@ using System.IO;
 using Avalonia.Reactive;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Platform;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
-using Avalonia.Media;
 using Avalonia.OpenGL;
 using Avalonia.Platform;
 using Avalonia.Rendering;
@@ -20,7 +18,6 @@ using Avalonia.Threading;
 using Avalonia.Utilities;
 using Avalonia.Win32.Input;
 using Avalonia.Win32.Interop;
-using Avalonia.Win32.WinRT;
 using static Avalonia.Win32.Interop.UnmanagedMethods;
 
 namespace Avalonia
@@ -42,17 +39,6 @@ namespace Avalonia
     /// </summary>
     public class Win32PlatformOptions
     {
-        /// <summary>
-        /// Deferred renderer would be used when set to true. Immediate renderer when set to false. The default value is true.
-        /// </summary>
-        /// <remarks>
-        /// Avalonia has two rendering modes: Immediate and Deferred rendering.
-        /// Immediate re-renders the whole scene when some element is changed on the scene. Deferred re-renders only changed elements.
-        /// </remarks>
-        public bool UseDeferredRendering { get; set; } = true;
-
-        public bool UseCompositor { get; set; } = true;
-
         /// <summary>
         /// Enables ANGLE for Windows. For every Windows version that is above Windows 7, the default is true otherwise it's false.
         /// </summary>
@@ -79,6 +65,7 @@ namespace Avalonia
 
         /// <summary>
         /// Render Avalonia to a Texture inside the Windows.UI.Composition tree.
+        /// This setting is true by default.
         /// </summary>
         /// <remarks>
         /// Supported on Windows 10 build 16299 and above. Ignored on other versions.
@@ -99,9 +86,19 @@ namespace Avalonia
         /// This is only recommended if low input latency is desirable, and there is no need for the transparency
         /// and stylings / blurrings offered by <see cref="UseWindowsUIComposition"/><br/>
         /// This is mutually exclusive with 
-        /// <see cref="UseWindowsUIComposition"/> which if active will override this setting. 
+        /// <see cref="UseWindowsUIComposition"/> which if active will override this setting.
+        /// This setting is false by default.
         /// </summary>
-        public bool UseLowLatencyDxgiSwapChain { get; set; } = false;
+        public bool UseLowLatencyDxgiSwapChain { get; set; }
+
+        /// <summary>
+        /// Render directly on the UI thread instead of using a dedicated render thread.
+        /// Only applicable if both <see cref="UseWindowsUIComposition"/> and <see cref="UseLowLatencyDxgiSwapChain"/>
+        /// are false.
+        /// This setting is only recommended for interop with systems that must render on the UI thread, such as WPF.
+        /// This setting is false by default.
+        /// </summary>
+        public bool ShouldRenderOnUIThread { get; set; }
         
         /// <summary>
         /// Provides a way to use a custom-implemented graphics context such as a custom ISkiaGpu
@@ -137,12 +134,10 @@ namespace Avalonia.Win32
         /// </summary>
         public static Version WindowsVersion { get; } = RtlGetVersion();
 
-        public static bool UseDeferredRendering => Options.UseDeferredRendering;
         internal static bool UseOverlayPopups => Options.OverlayPopups;
         public static Win32PlatformOptions Options { get; private set; }
-        
+
         internal static Compositor Compositor { get; private set; }
-        internal static PlatformRenderInterfaceContextManager RenderInterface { get; private set; }
 
         public static void Initialize()
         {
@@ -152,6 +147,8 @@ namespace Avalonia.Win32
         public static void Initialize(Win32PlatformOptions options)
         {
             Options = options;
+            var renderTimer = options.ShouldRenderOnUIThread ? new UiThreadRenderTimer(60) : new DefaultRenderTimer(60);
+
             AvaloniaLocator.CurrentMutable
                 .Bind<IClipboard>().ToSingleton<ClipboardImpl>()
                 .Bind<ICursorFactory>().ToConstant(CursorFactory.Instance)
@@ -159,7 +156,7 @@ namespace Avalonia.Win32
                 .Bind<IPlatformSettings>().ToSingleton<Win32PlatformSettings>()
                 .Bind<IPlatformThreadingInterface>().ToConstant(s_instance)
                 .Bind<IRenderLoop>().ToConstant(new RenderLoop())
-                .Bind<IRenderTimer>().ToConstant(new DefaultRenderTimer(60))
+                .Bind<IRenderTimer>().ToConstant(renderTimer)
                 .Bind<IWindowingPlatform>().ToConstant(s_instance)
                 .Bind<PlatformHotkeyConfiguration>().ToConstant(new PlatformHotkeyConfiguration(KeyModifiers.Control)
                 {
@@ -181,11 +178,8 @@ namespace Avalonia.Win32
             
             if (OleContext.Current != null)
                 AvaloniaLocator.CurrentMutable.Bind<IPlatformDragSource>().ToSingleton<DragSource>();
-
-            if (Options.UseCompositor)
-                Compositor = new Compositor(AvaloniaLocator.Current.GetRequiredService<IRenderLoop>(), platformGraphics);
-            else
-                RenderInterface = new PlatformRenderInterfaceContextManager(platformGraphics);
+            
+            Compositor = new Compositor(AvaloniaLocator.Current.GetRequiredService<IRenderLoop>(), platformGraphics);
         }
 
         public bool HasMessages()

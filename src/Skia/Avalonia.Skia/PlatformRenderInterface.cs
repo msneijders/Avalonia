@@ -41,6 +41,11 @@ namespace Avalonia.Skia
 
         public PixelFormat DefaultPixelFormat { get; }
 
+        public bool IsSupportedBitmapPixelFormat(PixelFormat format) =>
+            format == PixelFormats.Rgb565
+            || format == PixelFormats.Bgra8888
+            || format == PixelFormats.Rgba8888;
+
         public IGeometryImpl CreateEllipseGeometry(Rect rect) => new EllipseGeometryImpl(rect);
 
         public IGeometryImpl CreateLineGeometry(Point p1, Point p2) => new LineGeometryImpl(p1, p2);
@@ -81,7 +86,7 @@ namespace Avalonia.Skia
 
             SKPath path = new SKPath();
 
-            var (currentX, currentY) = glyphRun.PlatformImpl.Item.BaselineOrigin;
+            var (currentX, currentY) = glyphRun.BaselineOrigin;
 
             for (var i = 0; i < glyphRun.GlyphInfos.Count; i++)
             {
@@ -201,7 +206,11 @@ namespace Avalonia.Skia
             return new WriteableBitmapImpl(size, dpi, format, alphaFormat);
         }
 
-        public IGlyphRunImpl CreateGlyphRun(IGlyphTypeface glyphTypeface, double fontRenderingEmSize, IReadOnlyList<GlyphInfo> glyphInfos)
+        public IGlyphRunImpl CreateGlyphRun(
+            IGlyphTypeface glyphTypeface,
+            double fontRenderingEmSize, 
+            IReadOnlyList<GlyphInfo> glyphInfos,
+            Point baselineOrigin)
         {
             if (glyphTypeface == null)
             {
@@ -252,7 +261,6 @@ namespace Avalonia.Skia
 
             var scale = fontRenderingEmSize / glyphTypeface.Metrics.DesignEmHeight;
             var height = glyphTypeface.Metrics.LineSpacing * scale;
-            var baselineOrigin = new Point(0, -glyphTypeface.Metrics.Ascent * scale);
 
             return new GlyphRunImpl(builder.Build(), new Size(width, height), baselineOrigin);
         }
