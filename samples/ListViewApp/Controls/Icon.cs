@@ -18,8 +18,8 @@ namespace ListViewApp.Controls
 {
     internal static class Extensions
     {
-        public static T GetService<T>(this IServiceProvider sp) => (T)sp?.GetService(typeof(T));
-        public static Uri GetContextBaseUri(this IServiceProvider ctx) => ctx.GetService<IUriContext>().BaseUri;
+        public static T? GetService<T>(this IServiceProvider sp) where T : class => sp?.GetService(typeof(T)) as T;
+        public static Uri? GetContextBaseUri(this IServiceProvider ctx) => ctx.GetService<IUriContext>()?.BaseUri;
     }
 
     [TypeConverter(typeof(IconTypeConverter))]
@@ -37,6 +37,9 @@ namespace ListViewApp.Controls
 
         public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
+            if (context is null)
+                return null;
+
             var s = (string)value;
             if (s.EndsWith(".svg"))
             {
@@ -65,43 +68,11 @@ namespace ListViewApp.Controls
         public static readonly StyledProperty<IconImage?> SourceProperty =
             AvaloniaProperty.Register<Image, IconImage?>(nameof(Source));
 
-        /// <summary>
-        /// Defines the <see cref="Stretch"/> property.
-        /// </summary>
-        public static readonly StyledProperty<Stretch> StretchProperty =
-            AvaloniaProperty.Register<Image, Stretch>(nameof(Stretch), Stretch.Uniform);
-
-        /// <summary>
-        /// Defines the <see cref="StretchDirection"/> property.
-        /// </summary>
-        public static readonly StyledProperty<StretchDirection> StretchDirectionProperty =
-            AvaloniaProperty.Register<Image, StretchDirection>(
-                nameof(StretchDirection),
-                StretchDirection.Both);
-
         [Content]
         public IconImage? Source
         {
             get { return GetValue(SourceProperty); }
             set { SetValue(SourceProperty, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets a value controlling how the image will be stretched.
-        /// </summary>
-        public Stretch Stretch
-        {
-            get { return GetValue(StretchProperty); }
-            set { SetValue(StretchProperty, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets a value controlling in what direction the image will be stretched.
-        /// </summary>
-        public StretchDirection StretchDirection
-        {
-            get { return GetValue(StretchDirectionProperty); }
-            set { SetValue(StretchDirectionProperty, value); }
         }
 
         protected override Size ArrangeOverride(Size finalSize)
@@ -118,12 +89,12 @@ namespace ListViewApp.Controls
         {
             var source = Source;
 
-            if (source != null && Bounds.Width > 0 && Bounds.Height > 0)
+            if (source is not null && source.Image is not null && Bounds.Width > 0 && Bounds.Height > 0)
             {
                 Rect viewPort = new Rect(Bounds.Size);
                 Size sourceSize = source.Image.Size;
 
-                Vector scale = Stretch.CalculateScaling(Bounds.Size, sourceSize, StretchDirection);
+                Vector scale = Stretch.Uniform.CalculateScaling(Bounds.Size, sourceSize, StretchDirection.Both);
                 Size scaledSize = sourceSize * scale;
                 Rect destRect = viewPort
                     .CenterRect(new Rect(scaledSize))

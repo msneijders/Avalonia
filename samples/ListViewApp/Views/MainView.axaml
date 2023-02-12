@@ -7,7 +7,9 @@
              x:Class="ListViewApp.Views.MainView"
              x:CompileBindings="True">
   <Grid>
-    <controls:Icon Source="/Assets/nurse-svgrepo-com.svg" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+    <Path Fill="White" Stretch="Fill" Stroke="Black" StrokeThickness="2" HorizontalAlignment="Left" Margin="30,-1.6,0,0" Width="25" Grid.Row="1"
+        Data="M22.166642,154.45381 L29.999666,187.66699 40.791059,154.54395"/>
+    <controls:Icon Source="/Assets/nurse-svgrepo-com.svg" />
     <!--<StackPanel>
       
       --><!--<Image Source="Assets\pannenkoek.jpg" Width="300" Height="300" Stretch="UniformToFill"/>--><!--
