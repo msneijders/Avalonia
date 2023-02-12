@@ -4,6 +4,6 @@
              x:Class="ListViewApp.App">
 
     <Application.Styles>
-        <FluentTheme Mode="Light"/>
+        <FluentTheme />
     </Application.Styles>
 </Application>

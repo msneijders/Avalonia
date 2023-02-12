@@ -2,96 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:ListViewApp.ViewModels"
-             xmlns:my="clr-namespace:ListViewApp.Controls"
+             xmlns:controls="clr-namespace:ListViewApp.Controls"
              mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="800"
-             x:DataType="viewModels:MainViewModel"
              x:Class="ListViewApp.Views.MainView"
              x:CompileBindings="True">
-  <UserControl.Resources>
-    <ResourceDictionary>
-      <ControlTheme x:Key="{x:Type my:ListView}" TargetType="my:ListView">
-        <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource ListBoxBorderThemeThickness}" />
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-        <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True" />
-        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
-        <Setter Property="Template">
-          <ControlTemplate>
-            <Border Name="border"
-                    ClipToBounds="{TemplateBinding ClipToBounds}"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{TemplateBinding CornerRadius}">
-              <my:StretchEdgeEffect>
-                <ScrollViewer Name="PART_ScrollViewer"
-                              HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
-                              VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
-                              IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
-                              AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
-
-                  <ItemsRepeater Name="PART_ItemsPresenter"
-                                  Items="{TemplateBinding Items}"
-                                  ItemTemplate="{TemplateBinding ItemTemplate}"
-                                  Margin="0"
-                                     />
-
-                </ScrollViewer>
-              </my:StretchEdgeEffect>
-            </Border>
-          </ControlTemplate>
-        </Setter>
-      </ControlTheme>
-    </ResourceDictionary>
-  </UserControl.Resources>
-  <UserControl.Styles>
-    
-    <Style Selector="TextBlock.h1">
-      <Setter Property="FontWeight" Value="Bold"/>
-    </Style>
-    <Style Selector="Border.AantalBox">
-      <Setter Property="Background" Value="DeepPink"/>
-      <Setter Property="CornerRadius" Value="5"/>
-    </Style>
-
-    <Style Selector="ListBoxItem">
-      <Setter Property="Padding" Value="1"/>
-    </Style>
-  </UserControl.Styles>
-  <Design.DataContext>
-    <!-- This only sets the DataContext for the previewer in an IDE,
-         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <viewModels:MainViewModel />
-  </Design.DataContext>
   <Grid>
-  <Grid RowDefinitions="40, *">
-    <StackPanel Orientation="Horizontal" Spacing="5" Margin="5">
-      <Button x:Name="btnInsert" Content="Insert at 4" Click=""/>
-      <Button x:Name="btnTest" Content="Test" Click=""/>
-    </StackPanel>
-    <my:ListView Grid.Row="1" x:Name="list" Items="{Binding Regels}" SelectedItem="{Binding Selected, Mode=TwoWay}">
-      <my:ListView.ItemTemplate>
-        <DataTemplate DataType="viewModels:OrderregContainer">
-          <ListBoxItem>
-            <Grid ColumnDefinitions="*, 50">
-              <Grid ColumnDefinitions="*, 50" RowDefinitions="Auto, Auto">
-                <TextBlock Classes="h1" Text="{Binding Item.Omschrijving}" Grid.ColumnSpan="2"/>
-                <TextBlock Grid.Row="1" Text="{Binding Sorteringskenmerken}"/>
-                <TextBlock Classes="h1" Grid.Row="1" Grid.Column="1" Text="{Binding Item.Prijs}" HorizontalAlignment="Right" Padding="4"/>
-              </Grid>
-              <Border Classes="AantalBox" Grid.Column="1">
-                <TextBlock Text="{Binding Item.Aantal}" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="White"/>
-              </Border>
-            </Grid>
-          </ListBoxItem>
-        </DataTemplate>
-      </my:ListView.ItemTemplate>
-    </my:ListView>
-
-  </Grid>
+    <controls:Icon Source="/Assets/nurse-svgrepo-com.svg" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+    <!--<StackPanel>
+      
+      --><!--<Image Source="Assets\pannenkoek.jpg" Width="300" Height="300" Stretch="UniformToFill"/>--><!--
+    </StackPanel>-->
   </Grid>
 </UserControl>
