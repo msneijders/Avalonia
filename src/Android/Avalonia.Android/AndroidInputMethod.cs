@@ -136,6 +136,7 @@ namespace Avalonia.Android
                     TextInputContentType.Number => global::Android.Text.InputTypes.ClassNumber,
                     TextInputContentType.Password => global::Android.Text.InputTypes.TextVariationPassword,
                     TextInputContentType.Digits => global::Android.Text.InputTypes.ClassPhone,
+                    TextInputContentType.Search => global::Android.Text.InputTypes.Null,
                     TextInputContentType.Url => global::Android.Text.InputTypes.TextVariationUri,
                     _ => global::Android.Text.InputTypes.ClassText
                 };
@@ -161,6 +162,8 @@ namespace Avalonia.Android
                 };
 
                 outAttrs.ImeOptions |= ImeFlags.NoFullscreen | ImeFlags.NoExtractUi;
+
+                outAttrs.InputType = InputTypes.TextFlagNoSuggestions | InputTypes.TextVariationPassword;
 
                 return _inputConnection;
             });

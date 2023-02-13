@@ -15,9 +15,9 @@ namespace Avalonia.Controls
 
         public Visual TextViewVisual => _presenter!;
 
-        public bool SupportsPreedit => true;
+        public bool SupportsPreedit => false;
 
-        public bool SupportsSurroundingText => true;
+        public bool SupportsSurroundingText => false;
 
         public Rect CursorRectangle
         {

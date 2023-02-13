@@ -505,7 +505,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
             int? start, end;
 
-            if(SurroundingText.CursorOffset != SurroundingText.AnchorOffset)
+            if (SurroundingText.CursorOffset != SurroundingText.AnchorOffset)
             {
                 start = Math.Min(SurroundingText.CursorOffset, SurroundingText.AnchorOffset);
                 end = Math.Max(SurroundingText.CursorOffset, SurroundingText.AnchorOffset);
