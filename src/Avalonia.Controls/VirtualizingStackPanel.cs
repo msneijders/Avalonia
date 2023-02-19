@@ -402,16 +402,58 @@ namespace Avalonia.Controls
 
             if (firstIndex == -1)
             {
-                estimatedElementSize = EstimateElementSizeU();
-                firstIndex = Math.Min((int)(viewportStart / estimatedElementSize), maxIndex);
-                firstIndexU = firstIndex * estimatedElementSize;
+                // ---
+                double startU = _realizedElements.StartU;
+                for (int i = _realizedElements.FirstIndex - 1; i >= 0; i--)
+                {
+                    var e = CreateElement(items!, i);
+                    e.Measure(new Size(viewport.Width, double.PositiveInfinity));
+                    startU -= e.DesiredSize.Height;
+                    RemoveInternalChild(e);
+                    if (startU <= viewportStart)
+                    {
+                        firstIndex = i;
+                        firstIndexU = startU;
+                        break;
+                    }
+                }
+                // ---
+
+                if (firstIndex == -1)
+                {
+                    estimatedElementSize = EstimateElementSizeU();
+                    firstIndex = Math.Min((int)(viewportStart / estimatedElementSize), maxIndex);
+                    firstIndexU = firstIndex * estimatedElementSize;
+                }
             }
 
             if (lastIndex == -1)
             {
-                if (estimatedElementSize == -1)
-                    estimatedElementSize = EstimateElementSizeU();
-                lastIndex = Math.Min((int)(viewportEnd / estimatedElementSize), maxIndex);
+                // ---
+                if (_realizedElements.Count > 0)
+                {
+                    double endU = _realizedElements.GetEndU();
+                    for (int i = _realizedElements.LastIndex + 1; i < items!.Count; i++)
+                    {
+                        var e = CreateElement(items, i);
+                        e.Measure(new Size(viewport.Width, double.PositiveInfinity));
+                        endU += e.DesiredSize.Height;
+                        RemoveInternalChild(e);
+                        if (endU >= viewportEnd)
+                        {
+                            lastIndex = i;
+                            break;
+                        }
+                    }
+                }
+                // ---
+
+                if (lastIndex == -1)
+                {
+                    if (estimatedElementSize == -1)
+                        estimatedElementSize = EstimateElementSizeU();
+                    lastIndex = Math.Min((int)(viewportEnd / estimatedElementSize), maxIndex);
+                }
             }
 
             return new MeasureViewport
@@ -1290,6 +1332,20 @@ namespace Avalonia.Controls
                 _startUUnstable = false;
                 _elements?.Clear();
                 _sizes?.Clear();
+            }
+
+            public double GetEndU()
+            {
+                if (_sizes is null)
+                    return 0.0;
+
+                double endU = _startU;
+                for (int i = 0; i < _sizes.Count; i++)
+                {
+                    endU += _sizes[i];
+                }
+
+                return endU;
             }
         }
 
